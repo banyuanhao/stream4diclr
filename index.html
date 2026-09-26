@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Stream4D | 4D-Consistency for Streaming Autoregressive Diffusion Video Models</title>
+  <meta name="title" content="Stream4D: 4D-Consistency for Streaming Autoregressive Diffusion Video Models">
+  <meta name="description" content="Stream4D trains streaming autoregressive video models with dynamic 4D reconstruction, natural-motion, and perceptual rewards.">
+  <meta name="keywords" content="Stream4D, video generation, autoregressive video, reinforcement learning, 4D consistency, Gaussian Splatting, world models">
+  <meta name="robots" content="index, follow">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="Stream4D">
+  <meta property="og:title" content="Stream4D: 4D-Consistency for Streaming Autoregressive Diffusion Video Models">
+  <meta property="og:description" content="A reinforcement-learning recipe that rewards coherent moving worlds with dynamic 4D reconstruction.">
+  <meta property="og:image" content="static/images/social_preview.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Stream4D">
+  <meta name="twitter:description" content="4D-consistency for streaming autoregressive diffusion video models.">
+  <meta name="twitter:image" content="static/images/social_preview.png">
+  <link rel="icon" type="image/svg+xml" href="static/images/favicon.svg">
+  <style>
+    :root{
+      --ink:#101318;--muted:#58606b;--line:#e7eaf0;--soft:#f6f8fb;
+      --blue:#1769e0;--green:#0b8f65;--red:#ca342c;--amber:#b76a00;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:var(--ink);background:white;line-height:1.55}
+    a{color:var(--blue);text-decoration:none} a:hover{text-decoration:underline}
+    .wrap{max-width:1180px;margin:0 auto;padding:0 22px}
+    header.hero{padding:56px 0 30px;background:linear-gradient(180deg,#f7fbff 0%,#fff 88%);border-bottom:1px solid var(--line)}
+    h1{font-size:48px;line-height:1.06;margin:0 auto 14px;letter-spacing:-.035em;max-width:1000px;text-align:center}
+    h2{font-size:28px;line-height:1.2;margin:0 0 16px;letter-spacing:-.02em}
+    h3{font-size:18px;margin:0 0 8px}
+    .subtitle{font-size:20px;color:var(--muted);max-width:900px;margin:0 auto 22px;text-align:center}
+    section{padding:42px 0;border-bottom:1px solid var(--line)}
+    .teaser{width:100%;border-radius:14px;box-shadow:0 14px 40px rgba(16,19,24,.12);background:#fff}
+    .caption{font-size:14px;color:var(--muted);max-width:980px;margin:12px auto 0;text-align:center}
+    .abstract{max-width:930px;margin:0 auto}.abstract p{font-size:17px;color:#27313f}.abstract strong{color:var(--ink)}
+    .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}.card{background:var(--soft);border:1px solid var(--line);border-radius:16px;padding:18px}.card strong{display:block;font-size:17px;margin-bottom:5px}.card p{margin:0;color:var(--muted)}
+    .results{width:100%;border-collapse:separate;border-spacing:0;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:#fff}.results th,.results td{padding:12px 14px;border-bottom:1px solid var(--line);text-align:center}.results th{background:#f1f5fb;font-size:14px}.results td:first-child,.results th:first-child{text-align:left}.results tr:last-child td{border-bottom:0}.hi{font-weight:800;color:var(--green)}
+    .examples{display:flex;flex-direction:column;gap:28px}.example{border:1px solid var(--line);border-radius:18px;background:#fff;overflow:hidden;box-shadow:0 8px 24px rgba(16,19,24,.06)}.example-head{padding:14px 16px;background:#f7f9fc;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;gap:12px;align-items:center}.example-title{font-weight:800}.tag{font-size:12px;border:1px solid #bde5d5;background:#eaf8f2;color:var(--green);border-radius:999px;padding:4px 8px;font-weight:700}.video-row{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:#dfe4ec}.vidcell{background:#fff;padding:8px}.vidcell video{width:100%;border-radius:10px;background:#000;display:block}.vidlab{text-align:center;font-weight:800;margin-top:6px;font-size:14px}.vidlab.ours{color:var(--red)}.example-note{margin:0;padding:13px 16px 15px;color:var(--muted);font-size:15px;background:#fff;border-top:1px solid var(--line)}
+    footer{padding:30px 0;color:var(--muted);text-align:center}
+    @media (max-width:900px){h1{font-size:36px}.subtitle{font-size:17px}.grid,.video-row{grid-template-columns:1fr}.wrap{padding:0 16px}}
+  </style>
+</head>
+<body>
+<header class="hero">
+  <div class="wrap">
+    <h1>Stream4D: 4D-Consistency for Streaming Autoregressive Diffusion Video Models</h1>
+    <p class="subtitle">Reinforcement learning with dynamic 4D reconstruction rewards for coherent moving worlds.</p>
+  </div>
+</header>
+
+<main>
+<section>
+  <div class="wrap">
+    <img class="teaser" src="static/images/teaser.png" alt="Stream4D teaser comparing Base, World-R1, VideoGPA, and Stream4D on a cat carrying a fish over time">
+    <p class="caption"><strong>Static-3D rewards suppress motion; Stream4D keeps dynamic scenes moving.</strong> In this LongLive rollout, the base contains large but unstable motion, World-R1 and VideoGPA move toward more rigid low-motion scenes, and Stream4D keeps the cat running while preserving a coherent subject and background.</p>
+  </div>
+</section>
+
+<section id="abstract">
+  <div class="wrap abstract">
+    <h2>Abstract</h2>
+    <p>Streaming autoregressive diffusion models enable real-time, long-horizon video generation, but local frame objectives do not directly enforce the geometry and dynamics of a coherent world. Long rollouts therefore accumulate geometric drift, inconsistent object identity, and unnatural scene motion.</p>
+    <p>Recent reward-based methods use static 3D Gaussian-Splatting reconstruction to encourage consistency. However, a single rigid 3D reconstruction cannot model dynamic objects, so genuine object motion becomes reconstruction error and the reward can be maximized by freezing the scene. This shortcut is especially harmful in the autoregressive setting, where each generated chunk propagates the previous chunk's mistakes.</p>
+    <p><strong>Stream4D</strong> replaces the static critic with a feed-forward 4D Gaussian-Splatting reconstruction reward that explicitly represents scene dynamics. We combine this 4D reconstruction term with a target-centered natural-motion prior and a lightweight perceptual anchor. Across Self-Forcing, Causal-Forcing, and LongLive backbones, Stream4D improves 4D reconstruction quality while preserving motion and human-aligned video preference.</p>
+  </div>
+</section>
+
+<section id="method">
+  <div class="wrap">
+    <h2>How Stream4D works</h2>
+    <div class="grid">
+      <div class="card"><strong>4D reconstruction consistency</strong><p>MoVieS reconstructs each rollout as a dynamic 4D Gaussian scene and re-renders it at estimated cameras. High reward means the video can be explained as a coherent evolving scene.</p></div>
+      <div class="card"><strong>Natural-motion prior</strong><p>A peaked Gaussian target on scene-flow magnitude encourages enough motion, but not runaway blur. Smoothness and rigidity terms penalize jitter and spatially erratic flow.</p></div>
+      <div class="card"><strong>Perceptual anchor</strong><p>HPSv2 stabilizes appearance so the policy does not trade visual quality for geometry and motion reward. The three axes are z-normalized and summed.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="results">
+  <div class="wrap">
+    <h2>Highlights</h2>
+    <table class="results">
+      <thead><tr><th>Backbone</th><th>MoVieS 4D-PSNR gain</th><th>Gemini Consistency win%</th><th>VideoReward Overall win%</th></tr></thead>
+      <tbody>
+        <tr><td>Self-Forcing</td><td class="hi">+3.46 dB</td><td>82.2%</td><td>66.2%</td></tr>
+        <tr><td>Causal-Forcing</td><td class="hi">+5.53 dB</td><td>73.9%</td><td>76.0%</td></tr>
+        <tr><td>LongLive</td><td class="hi">+6.76 dB</td><td>74.2%</td><td>84.4%</td></tr>
+      </tbody>
+    </table>
+    <p class="caption">Compared with each backbone's distilled base on the 500-prompt motion-prominent evaluation set. A LongLive human study further confirms that people prefer Stream4D over static-3D reward baselines.</p>
+  </div>
+</section>
+
+<section id="examples">
+  <div class="wrap">
+    <h2>Video examples</h2>
+    <div class="examples">
+      <article class="example">
+        <div class="example-head"><span class="example-title">Cat running with a fish</span></div>
+        <div class="video-row">
+          <div class="vidcell"><video src="static/videos/examples/hm367_base.mp4" autoplay muted loop playsinline controls></video><div class="vidlab">Base</div></div>
+          <div class="vidcell"><video src="static/videos/examples/hm367_worldr1.mp4" autoplay muted loop playsinline controls></video><div class="vidlab">World-R1</div></div>
+          <div class="vidcell"><video src="static/videos/examples/hm367_videogpa.mp4" autoplay muted loop playsinline controls></video><div class="vidlab">VideoGPA</div></div>
+          <div class="vidcell"><video src="static/videos/examples/hm367_stream4d.mp4" autoplay muted loop playsinline controls></video><div class="vidlab ours">Stream4D</div></div>
+        </div>
+        <p class="example-note">The base model’s video motion is overly strong and unnatural, with noticeable jittering.</p>
+      </article>
+      <article class="example">
+        <div class="example-head"><span class="example-title">Bee-like armored alien walking</span></div>
+        <div class="video-row">
+          <div class="vidcell"><video src="static/videos/examples/hm302_base.mp4" autoplay muted loop playsinline controls></video><div class="vidlab">Base</div></div>
+          <div class="vidcell"><video src="static/videos/examples/hm302_worldr1.mp4" autoplay muted loop playsinline controls></video><div class="vidlab">World-R1</div></div>
+          <div class="vidcell"><video src="static/videos/examples/hm302_videogpa.mp4" autoplay muted loop playsinline controls></video><div class="vidlab">VideoGPA</div></div>
+          <div class="vidcell"><video src="static/videos/examples/hm302_stream4d.mp4" autoplay muted loop playsinline controls></video><div class="vidlab ours">Stream4D</div></div>
+        </div>
+        <p class="example-note">The character motion in the base model is inconsistent with the background. The character appears to be walking forward but moves to the right, creating a noticeable floating effect.</p>
+      </article>
+      <article class="example">
+        <div class="example-head"><span class="example-title">E.T. riding a flying motorcycle</span></div>
+        <div class="video-row">
+          <div class="vidcell"><video src="static/videos/examples/hm266_base.mp4" autoplay muted loop playsinline controls></video><div class="vidlab">Base</div></div>
+          <div class="vidcell"><video src="static/videos/examples/hm266_worldr1.mp4" autoplay muted loop playsinline controls></video><div class="vidlab">World-R1</div></div>
+          <div class="vidcell"><video src="static/videos/examples/hm266_videogpa.mp4" autoplay muted loop playsinline controls></video><div class="vidlab">VideoGPA</div></div>
+          <div class="vidcell"><video src="static/videos/examples/hm266_stream4d.mp4" autoplay muted loop playsinline controls></video><div class="vidlab ours">Stream4D</div></div>
+        </div>
+        <p class="example-note">The motion disappears in the World-R1 and VideoGPA.</p>
+      </article>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="wrap">Stream4D project page.</div>
+</footer>
+</body>
+</html>
